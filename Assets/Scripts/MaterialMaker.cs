@@ -23,6 +23,7 @@ public class MaterialMaker : MonoBehaviour
 
     IEnumerator CreateMaterial()
     {
+        _material.EnableKeyword("_METALLICGLOSSMAP");
         _material.EnableKeyword("_EMISSION");
         _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
         _material.SetColor("_EmissionColor", Color.white);
@@ -63,12 +64,12 @@ public class MaterialMaker : MonoBehaviour
                     // Particular case of the metallic map
                     if (textureName == "_MetallicGlossMap")
                     {
-                        // Switch G and A channels
+                        // Put G channel to R and B to A
                         Color[] pixels = texture.GetPixels();
                         Color[] resultingPixels = new Color[pixels.Length];
                         for (int c = 0; c < pixels.Length; c++)
                         {
-                            resultingPixels[c] = new Color(pixels[c].r, pixels[c].a, pixels[c].b, pixels[c].g);
+                            resultingPixels[c] = new Color(pixels[c].g, pixels[c].a, pixels[c].b, pixels[c].b);
                         }
                         texture.SetPixels(resultingPixels);
                         texture.Apply();
