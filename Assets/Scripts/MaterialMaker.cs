@@ -11,6 +11,7 @@ public class MaterialMaker : MonoBehaviour
     [SerializeField] string normalUrl;
     [SerializeField] string occlusionUrl;
     [SerializeField] Slider slider;
+    [SerializeField] GameObject bottomBar;
 
     private Material _material;
 
@@ -19,6 +20,7 @@ public class MaterialMaker : MonoBehaviour
     {
         slider.value = 0;
         _material = new Material(GetComponent<Renderer>().material);
+        bottomBar.SetActive(false);
         StartCoroutine(CreateMaterial());
     }
 
@@ -52,6 +54,7 @@ public class MaterialMaker : MonoBehaviour
 
         // Finally apply the material
         GetComponent<Renderer>().material = _material;
+        bottomBar.SetActive(true);
     }
 
     /// <summary>
