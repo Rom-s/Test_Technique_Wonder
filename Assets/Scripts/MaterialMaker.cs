@@ -17,35 +17,55 @@ public class MaterialMaker : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        slider.value = 0;
         _material = new Material(GetComponent<Renderer>().material);
         StartCoroutine(CreateMaterial());
     }
 
+    /// <summary>
+    /// Create the material using several web requests
+    /// </summary>
+    /// <returns></returns>
     IEnumerator CreateMaterial()
     {
+        // Enable some features of the shader
         _material.EnableKeyword("_METALLICGLOSSMAP");
         _material.EnableKeyword("_EMISSION");
         _material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
         _material.SetColor("_EmissionColor", Color.white);
 
-        yield return StartCoroutine(GetRequest(baseMapUrl, "_MainTex"));
-        yield return StartCoroutine(GetRequest(emissiveUrl, "_EmissionMap"));
-        yield return StartCoroutine(GetRequest(metallicRoughnessUrl, "_MetallicGlossMap"));
-        yield return StartCoroutine(GetRequest(normalUrl, "_BumpMap"));
-        yield return StartCoroutine(GetRequest(occlusionUrl, "_OcclusionMap"));
+        // Get the 5 textures by web requests
+        StartCoroutine(GetRequest(baseMapUrl, "_MainTex"));
+        StartCoroutine(GetRequest(emissiveUrl, "_EmissionMap"));
+        StartCoroutine(GetRequest(metallicRoughnessUrl, "_MetallicGlossMap"));
+        StartCoroutine(GetRequest(normalUrl, "_BumpMap"));
+        StartCoroutine(GetRequest(occlusionUrl, "_OcclusionMap"));
+
+        // Wait until the requests are done
+        while (slider.value < 1)
+        {
+            yield return null;
+        }
 
         yield return new WaitForSeconds(0.5f);
         slider.gameObject.SetActive(false);
+
+        // Finally apply the material
         GetComponent<Renderer>().material = _material;
     }
 
+    /// <summary>
+    /// Make a web request at uri and apply the resulted texture to the material
+    /// </summary>
+    /// <param name="uri">The texture adress</param>
+    /// <param name="textureName">The texture name to be set</param>
+    /// <returns></returns>
     IEnumerator GetRequest(string uri, string textureName)
     {
+        // The using statement ensures that the web request is disposed at the end
         using (UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(uri))
         {
-            slider.value += 1f / 10f;
-
-            // Request and wait for the desired page.
+            // Request and wait
             yield return webRequest.SendWebRequest();
 
             switch (webRequest.result)
@@ -58,7 +78,7 @@ public class MaterialMaker : MonoBehaviour
                     Debug.LogError("HTTP Error: " + webRequest.error);
                     break;
                 case UnityWebRequest.Result.Success:
-                    Debug.Log("Received: " + webRequest.downloadHandler.text);
+                    Debug.Log("Received texture (" + textureName + "): " + webRequest.downloadHandler.text);
                     Texture2D texture = ((DownloadHandlerTexture)webRequest.downloadHandler).texture;
 
                     // Particular case of the metallic map
@@ -76,7 +96,7 @@ public class MaterialMaker : MonoBehaviour
                     }
 
                     _material.SetTexture(textureName, texture);
-                    slider.value += 1f / 10f;
+                    slider.value += 1f / 5f;
                     break;
             }
         }

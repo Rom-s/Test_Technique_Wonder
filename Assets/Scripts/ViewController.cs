@@ -22,6 +22,7 @@ public class ViewController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Setting _timeTransiton to transitionDuration will prevent view transition 
         _timeTransition = transitionDuration;
         _currentView = View.Front;
         helmetTransform.eulerAngles = _viewRotations[(int)View.Front];
@@ -44,6 +45,7 @@ public class ViewController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Make transition between views: transition concerns the helmet rotation, button's texts, button's symbols and the purple sprite position
         if (_timeTransition < transitionDuration)
         {
             _timeTransition = Mathf.Clamp(_timeTransition + Time.deltaTime, 0f, transitionDuration);
@@ -62,8 +64,13 @@ public class ViewController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rotate the helmet to the indicated view
+    /// </summary>
+    /// <param name="view"></param>
     private void RotateTo(View view)
     {
+        // Transition is prevented if it is already in progress or if the requested view is the current view 
         if (_timeTransition < transitionDuration || view == _currentView)
         {
             return;
@@ -73,6 +80,8 @@ public class ViewController : MonoBehaviour
         _buttonTexts[(int)view].gameObject.SetActive(true);
 
         _destinationView = view;
+
+        // Setting _timeTransiton to 0 will trigger view transition 
         _timeTransition = 0f;
     }
 }
